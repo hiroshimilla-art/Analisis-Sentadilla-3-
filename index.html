@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Varo y valgo de rodilla en vivo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <h1>Varo y valgo de rodilla · en vivo</h1>
+    <p class="mut">Apoya la tablet a 2–3 m (en vertical entra mejor el cuerpo completo), ponte de frente y usa «Pantalla completa»: los valores se ven grandes desde lejos. La app mide en tiempo real la desviación de cada rodilla respecto de la línea cadera–tobillo y la resume por repetición.</p>
+    
+    <div class="wrap">
+      <section class="card" style="margin-top:0">
+        <div class="row">
+          <button id="go">Iniciar cámara</button>
+          <button id="cal" class="s" disabled>Calibrar de pie</button>
+          <button id="rst" class="s">Reiniciar repeticiones</button>
+          <button id="dl" class="s" disabled>Descargar CSV</button>
+        </div>
+        
+        <div class="row" style="margin-top:8px">
+          <label class="bt">🎥 Grabar con la cámara del dispositivo
+            <input id="vc" type="file" accept="video/*" capture>
+          </label>
+          <label class="bt">📁 Elegir un video
+            <input id="vf" type="file" accept="video/*">
+          </label>
+        </div>
+        
+        <p class="mut" style="margin:4px 0 0">Si «Iniciar cámara» no funciona, graba un video con la cámara de la tablet (se analiza igual; al inicio quédate de pie y quieto unos 2 s).</p>
+        
+        <div class="row" style="margin-top:8px">
+          <label class="mut">Cámara 
+            <select id="fc">
+              <option value="user">Frontal</option>
+              <option value="environment">Trasera</option>
+            </select>
+          </label>
+          <label class="mut"><input type="checkbox" id="cam"> Cámara detrás del sujeto</label>
+          <label class="mut"><input type="checkbox" id="mir" checked> Espejo</label>
+          <label class="mut"><input type="checkbox" id="snd" checked> Alerta sonora</label>
+          <label class="mut" style="flex:1;min-width:170px">Tolerancia: <b id="tv">5</b>° 
+            <input id="tol" type="range" min="2" max="10" value="5" style="width:100%">
+          </label>
+        </div>
+        
+        <div class="stage" id="stage">
+          <video id="v" class="mir" playsinline muted></video>
+          <canvas id="ov"></canvas>
+          <button id="fs">⛶ Pantalla completa</button>
+        </div>
+        
+        <details>
+          <summary>¿La cámara no se activa?</summary>
+          <ol>
+            <li><b>Abre la página con https</b> (GitHub Pages o Netlify) o en localhost. Por <code>http://192.168…</code> o desde un archivo en la tablet, el navegador bloquea la cámara.</li>
+            <li>Cuando el navegador pregunte, toca <b>Permitir</b>. Si lo negaste: candado de la barra de direcciones › Permisos › Cámara › Permitir, y recarga.</li>
+            <li>Cierra otras apps o pestañas que usen la cámara (Zoom, Meet, Cámara).</li>
+            <li>Si la página está incrustada en otra (Google Sites, Moodle, un visor), ábrela en una pestaña nueva.</li>
+            <li>Usa Chrome o Safari actualizados. Estado actual: <b id="env"></b></li>
+          </ol>
+        </details>
+        
+        <div id="st">Pulsa «Iniciar cámara». Se necesita internet la primera vez para cargar el modelo.</div>
+      </section>
+
+      <div class="col">
+        <section class="card">
+          <h2>Desviación ahora</h2>
+          <div class="g2" id="gs"></div>
+          <p class="mut" style="margin-top:8px">Barra: izquierda = varo, derecha = valgo; el recuadro marca la tolerancia.</p>
+        </section>
+
+        <section class="card">
+          <h2>Flexión y velocidad ahora</h2>
+          <div class="g2" id="fx"></div>
+          <p class="mut" id="ph" style="margin-top:6px"></p>
+        </section>
+
+        <section class="card">
+          <h2>Últimos 15 s</h2>
+          <canvas id="ch" class="cv"></canvas>
+          <p class="mut"><b style="color:var(--r)">■</b> Rodilla derecha <b style="color:var(--l);margin-left:8px">■</b> Rodilla izquierda · punteado = tolerancia</p>
+          
+          <h2 style="margin-top:10px">Flexión</h2>
+          <canvas id="ch2" class="cv"></canvas>
+          <p class="mut">Continuo = rodilla, punteado = cadera; el color indica el lado.</p>
+          
+          <h2 style="margin-top:10px">Velocidad angular de la rodilla (promedio de ambas)</h2>
+          <canvas id="ch3" class="cv"></canvas>
+          <p class="mut">Positivo = bajando, negativo = subiendo.</p>
+        </section>
+
+        <section class="card">
+          <h2>Por repetición: desviación varo/valgo</h2>
+          <p class="mut" id="rn">Calibra de pie y empieza a sentadillar: cada repetición se registra sola.</p>
+          <div class="scroll"><table id="rt"></table></div>
+        </section>
+
+        <section class="card">
+          <h2>Por repetición: flexión y velocidad</h2>
+          <div class="scroll"><table id="rt2"></table></div>
+          <p class="mut" style="margin-top:6px">D = derecha, I = izquierda. Flexión relativa a la posición de pie calibrada (0° = extendido). Vel. media de descenso = flexión alcanzada ÷ tiempo de bajada. Vel. vertical = descenso de la cadera en largos de pierna por segundo.</p>
+        </section>
+      </div>
+    </div>
+
+    <p class="mut">Orientativo (proyección 2D, umbrales no validados clínicamente). Es más fiable con la cámara nivelada, de frente y a 2–3 m; con flexión profunda el muslo se acorta en la imagen y el valor pierde precisión. Valgo = rodilla hacia la línea media; varo = hacia afuera.</p>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
